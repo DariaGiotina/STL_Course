@@ -8,13 +8,14 @@ using namespace std;
 struct Probleme {
     string nume_problema;
     string specialitate_problema;
-    int ore_problema;
+    int durata;
 };
 struct Doctor
 {
     string name;
-    string specialty;
-    int ore = 8;
+    string specialitate;
+    int available_hours = 8; 
+    vector<string> assigned_problems;
 };
 int main()
 {
@@ -26,11 +27,8 @@ int main()
 
     vector<Probleme> probleme(no_problems);
 
-    for (int i = 0; i < no_problems; i++)
-    {
-        inFile >> probleme[i].nume_problema;
-        inFile >> probleme[i].specialitate_problema;
-        inFile >> probleme[i].ore_problema;
+    for (int i = 0; i < no_problems; i++) {
+        inFile >> probleme[i].nume_problema >> probleme[i].specialitate_problema >> probleme[i].durata;
     }
 
     inFile >> no_doctors;
@@ -38,34 +36,28 @@ int main()
     for (int i = 0; i < no_doctors; i++)
     {
         inFile >> doctors[i].name;
-        inFile >> doctors[i].specialty;
+        inFile >> doctors[i].specialitate;
     }
 
 
-    for (int i = 0; i < no_problems; i++)
-    {
-        bool accepted = false;
-        for (int j = 0; j < no_doctors; j++)
-        {
-
-            find_if(doctors.begin(), doctors.end(), [&](Doctor& doctor) {
-                if (doctor.specialty == probleme[i].specialitate_problema && doctor.name != "taken" && doctor.ore >= probleme[i].ore_problema)
-                {
-                    cout << doctor.name << " " << probleme[i].nume_problema << endl;
-                    doctor.name = "taken";
-                    doctor.ore -= probleme[i].ore_problema;
-                    accepted = true;
-                    return true;
-                }
-                return false;
-                });
-            if (accepted)
-            {
-                break;
+    for (const auto& problem : probleme) {
+        for (auto& doctor : doctors) {
+            if (doctor.specialitate == problem.specialitate_problema && doctor.available_hours >= problem.durata) {
+                doctor.assigned_problems.push_back(problem.nume_problema);
+                doctor.available_hours -= problem.durata;
+                break; 
             }
         }
-
     }
+
+    for (const auto& doctor : doctors) {
+        cout << doctor.name << " " << doctor.assigned_problems.size();
+        for (const auto& problem_name : doctor.assigned_problems) {
+            cout << " " << problem_name;
+        }
+        cout << endl;
+    }
+
 
     inFile.close();
 
